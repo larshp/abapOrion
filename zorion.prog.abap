@@ -1,24 +1,145 @@
 REPORT zorion.
 
-CONSTANTS: c_url TYPE string
-  VALUE 'https://s7hanaxs.hanatrial.ondemand.com/sap/hana/xs/dt/base/info'.
+*CONSTANTS:
+*  c_url1 TYPE string
+*    VALUE 'https://s7hanaxs.hanatrial.ondemand.com/sap/hana/xs/dt/base/info',
+*  c_url2 TYPE string
+*    VALUE 'https://accounts.sap.com/saml2/idp/sso/accounts.sap.com',
+*  c_url3 TYPE string
+*    VALUE 'https://account.hanatrial.ondemand.com/',
+*  c_url4 TYPE string
+*    VALUE 'https://s7hanaxs.hanatrial.ondemand.com/sap/hana/xs/dt/base/file/p13939179trial/foobar',
+*  c_url5 TYPE string
+*    VALUE 'https://s7hanaxs.hanatrial.ondemand.com/sap/hana/xs/dt/base/file/p13939179trial/foobar/0_NewPackage/0_NewFile.js'.
+
+*https://s7hanaxs.hanatrial.ondemand.com/sap/hana/xs/dt/base/file/p13939179trial/foobar
+CONSTANTS: c_url TYPE string VALUE 'https://s7hanaxs.hanatrial.ondemand.com/p13939179trial/foobar/0_NewPackage/index.html'.
 
 * TODO:
 * JTENANTSESSIONID  ??
 * SAML stuff
 * package = SAML2_CORE
 
+* http://www.ssocircle.com/en/1203/saml-request-online-decoder-encoder/
+
 START-OF-SELECTION.
   PERFORM run.
+
+CLASS lcl_util DEFINITION.
+
+  PUBLIC SECTION.
+    CLASS-METHODS download
+      IMPORTING VALUE(iv_data) TYPE string.
+    CLASS-METHODS parse
+      IMPORTING VALUE(iv_xml) TYPE string.
+ENDCLASS.
+
+CLASS lcl_util IMPLEMENTATION.
+
+  METHOD parse.
+
+    DATA: lt_results TYPE match_result_tab.
+
+
+    FIND REGEX '<input type="(\C*)" name="(\C*)" value="(\C*)">'
+      IN iv_xml IGNORING CASE
+      RESULTS lt_results.
+
+    BREAK-POINT.
+
+*'<input id="(\C*)" type="(\C*)" name="(\C*)" value="(\C*)">'
+
+  ENDMETHOD.
+
+  METHOD download.
+
+    DATA: lv_dir  TYPE string,
+          lt_data TYPE TABLE OF char200.
+
+    FIELD-SYMBOLS: <lv_data> LIKE LINE OF lt_data.
+
+
+    cl_gui_frontend_services=>get_sapgui_workdir(
+      CHANGING
+        sapworkdir            = lv_dir
+      EXCEPTIONS
+        get_sapworkdir_failed = 1
+        cntl_error            = 2
+        error_no_gui          = 3
+        not_supported_by_gui  = 4
+        OTHERS                = 5 ).
+    IF sy-subrc <> 0.
+      BREAK-POINT.
+      RETURN.
+    ENDIF.
+    cl_gui_cfw=>flush( ).
+
+    CONCATENATE lv_dir '\foobar.html' INTO lv_dir.
+
+    WHILE strlen( iv_data ) > 200.
+      APPEND INITIAL LINE TO lt_data ASSIGNING <lv_data>.
+      <lv_data> = iv_data(200).
+      iv_data = iv_data+200.
+    ENDWHILE.
+    APPEND INITIAL LINE TO lt_data ASSIGNING <lv_data>.
+    <lv_data> = iv_data.
+
+    cl_gui_frontend_services=>gui_download(
+      EXPORTING
+        filename                  = lv_dir
+      CHANGING
+        data_tab                  = lt_data
+      EXCEPTIONS
+        file_write_error          = 1
+        no_batch                  = 2
+        gui_refuse_filetransfer   = 3
+        invalid_type              = 4
+        no_authority              = 5
+        unknown_error             = 6
+        header_not_allowed        = 7
+        separator_not_allowed     = 8
+        filesize_not_allowed      = 9
+        header_too_long           = 10
+        dp_error_create           = 11
+        dp_error_send             = 12
+        dp_error_write            = 13
+        unknown_dp_error          = 14
+        access_denied             = 15
+        dp_out_of_memory          = 16
+        disk_full                 = 17
+        dp_timeout                = 18
+        file_not_found            = 19
+        dataprovider_exception    = 20
+        control_flush_error       = 21
+        not_supported_by_gui      = 22
+        error_no_gui              = 23
+        OTHERS                    = 24
+           ).
+    IF sy-subrc <> 0.
+      BREAK-POINT.
+      RETURN.
+    ENDIF.
+
+  ENDMETHOD.
+
+ENDCLASS.
 
 CLASS lcl_saml DEFINITION.
 
   PUBLIC SECTION.
-    CLASS-METHODS encode
+    CLASS-METHODS redirect_encode
       IMPORTING iv_xml            TYPE string
       RETURNING VALUE(rv_encoded) TYPE string.
 
-    CLASS-METHODS decode
+    CLASS-METHODS redirect_decode
+      IMPORTING iv_encoded    TYPE string
+      RETURNING VALUE(rv_xml) TYPE string.
+
+    CLASS-METHODS post_encode
+      IMPORTING iv_xml            TYPE string
+      RETURNING VALUE(rv_encoded) TYPE string.
+
+    CLASS-METHODS post_decode
       IMPORTING iv_encoded    TYPE string
       RETURNING VALUE(rv_xml) TYPE string.
 
@@ -54,7 +175,27 @@ ENDCLASS.
 
 CLASS lcl_saml IMPLEMENTATION.
 
-  METHOD encode.
+  METHOD post_encode.
+
+    DATA: lv_xstr TYPE xstring.
+
+
+    lv_xstr = string_to_xstring_utf8( iv_xml ).
+    rv_encoded = base64_encode( lv_xstr ).
+
+  ENDMETHOD.
+
+  METHOD post_decode.
+
+    DATA: lv_xstr TYPE xstring.
+
+
+    lv_xstr = base64_decode( iv_encoded ).
+    rv_xml = xstring_to_string_utf8( lv_xstr ).
+
+  ENDMETHOD.
+
+  METHOD redirect_encode.
 
     DATA: lv_str  TYPE string,
           lv_xstr TYPE xstring.
@@ -66,7 +207,7 @@ CLASS lcl_saml IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD decode.
+  METHOD redirect_decode.
 
     DATA: lv_str  TYPE string,
           lv_xstr TYPE xstring.
@@ -216,16 +357,44 @@ CLASS lcl_saml_test DEFINITION FOR TESTING RISK LEVEL HARMLESS DURATION SHORT FI
 
     METHODS setup.
     METHODS check_date IMPORTING iv_xml TYPE string.
-    METHODS encode FOR TESTING.
-    METHODS decode FOR TESTING.
+    METHODS redirect_encode FOR TESTING.
+    METHODS redirect_decode FOR TESTING.
+    METHODS post FOR TESTING.
 
 ENDCLASS.
 
 CLASS lcl_saml_test IMPLEMENTATION.
 
-  METHOD setup.
+  METHOD post.
 
-* http://www.ssocircle.com/en/1203/saml-request-online-decoder-encoder/
+    DATA: lv_encoded TYPE string,
+          lv_result  TYPE string.
+
+
+    lv_encoded = 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVR' &&
+      'GLTgiPz4NCjxzYW1scDpBdXRoblJlcXVlc3QgeG1sbnM6c2FtbHA9InV' &&
+      'ybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDpwcm90b2NvbCIgSUQ9ImF' &&
+      'nZG9iamNmaWtuZW9tbWZqYW1kY2xlbmpjcGNqbWdkZ2JtcGdqbW8iIFZl' &&
+      'cnNpb249IjIuMCIgSXNzdWVJbnN0YW50PSIyMDA3LTA0LTI2VDEzOjUxO' &&
+      'jU2WiIgUHJvdG9jb2xCaW5kaW5nPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0' &&
+      'FNTDoyLjA6YmluZGluZ3M6SFRUUC1QT1NUIiBQcm92aWRlck5hbWU9Imdv' &&
+      'b2dsZS5jb20iIEFzc2VydGlvbkNvbnN1bWVyU2VydmljZVVSTD0iaHR0cH' &&
+      'M6Ly93d3cuZ29vZ2xlLmNvbS9hL3NvbHdlYi5uby9hY3MiIElzUGFzc2l2' &&
+      'ZT0idHJ1ZSI+PHNhbWw6SXNzdWVyIHhtbG5zOnNhbWw9InVybjpvYXNpcz' &&
+      'puYW1lczp0YzpTQU1MOjIuMDphc3NlcnRpb24iPmdvb2dsZS5jb208L3Nh' &&
+      'bWw6SXNzdWVyPjxzYW1scDpOYW1lSURQb2xpY3kgQWxsb3dDcmVhdGU9InRy' &&
+      'dWUiIEZvcm1hdD0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOm5hbWVp' &&
+      'ZC1mb3JtYXQ6dW5zcGVjaWZpZWQiIC8+PC9zYW1scDpBdXRoblJlcXVlc3Q+DQo='.
+
+    lv_result = lcl_saml=>post_encode( lcl_saml=>post_decode( lv_encoded ) ).
+
+    cl_abap_unit_assert=>assert_equals(
+        act = lv_result
+        exp = lv_encoded ).
+
+  ENDMETHOD.
+
+  METHOD setup.
 
     mv_xml = '<?xml version="1.0" encoding="UTF-8"?>' &&
       '<samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" ' &&
@@ -275,23 +444,23 @@ CLASS lcl_saml_test IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD decode.
+  METHOD redirect_decode.
 
     DATA: lv_decoded TYPE string.
 
 
-    lv_decoded = lcl_saml=>decode( mv_encoded ).
+    lv_decoded = lcl_saml=>redirect_decode( mv_encoded ).
 
     check_date( lv_decoded ).
 
   ENDMETHOD.
 
-  METHOD encode.
+  METHOD redirect_encode.
 
     DATA: lv_xml TYPE string.
 
 
-    lv_xml = lcl_saml=>decode( lcl_saml=>encode( mv_xml ) ).
+    lv_xml = lcl_saml=>redirect_decode( lcl_saml=>redirect_encode( mv_xml ) ).
 
     check_date( lv_xml ).
 
@@ -302,9 +471,13 @@ ENDCLASS.
 
 FORM run.
 
-  DATA: li_client TYPE REF TO if_http_client,
-        lv_code   TYPE i.
+  DATA: lv_encoded  TYPE string,
+        lv_response TYPE string,
+        li_client   TYPE REF TO if_http_client,
+        lt_fields   TYPE tihttpnvp,
+        lv_code     TYPE i.
 
+  FIELD-SYMBOLS: <ls_field> LIKE LINE OF lt_fields.
 
   cl_http_client=>create_by_url(
     EXPORTING
@@ -312,6 +485,15 @@ FORM run.
       ssl_id = 'ANONYM'
     IMPORTING
       client = li_client ).
+
+*  li_client->request->set_header_field( name  = '~request_method'
+*                                        value = 'POST' ).
+*
+*  APPEND INITIAL LINE TO lt_fields ASSIGNING <ls_field>.
+*  <ls_field>-name = 'SAMLRequest'.
+*  <ls_field>-value = lv_encoded.
+*
+*  li_client->request->set_form_fields( lt_fields ).
 
   li_client->send( ).
   li_client->receive(
@@ -330,5 +512,15 @@ FORM run.
       code   = lv_code ).
 
   WRITE: / lv_code.
+
+  lv_response = li_client->response->get_cdata( ).
+
+  lcl_util=>parse( lv_response ).
+
+  WHILE strlen( lv_response ) > 100.
+    WRITE: / lv_response(100).
+    lv_response = lv_response+100.
+  ENDWHILE.
+  WRITE: / lv_response.
 
 ENDFORM.
