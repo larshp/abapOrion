@@ -58,5 +58,23 @@
    <ENTRY>abapOrion</ENTRY>
    <LENGTH>9 </LENGTH>
   </TEXTPOOL>
+  <TEXTPOOL>
+   <ID>S</ID>
+   <KEY>P_PASSW</KEY>
+   <ENTRY>        Password</ENTRY>
+   <LENGTH>16 </LENGTH>
+  </TEXTPOOL>
+  <TEXTPOOL>
+   <ID>S</ID>
+   <KEY>P_URL</KEY>
+   <ENTRY>        URL</ENTRY>
+   <LENGTH>11 </LENGTH>
+  </TEXTPOOL>
+  <TEXTPOOL>
+   <ID>S</ID>
+   <KEY>P_USER</KEY>
+   <ENTRY>        Username</ENTRY>
+   <LENGTH>16 </LENGTH>
+  </TEXTPOOL>
  </TEXTPOOL_TABLE>
 </abapGit>
