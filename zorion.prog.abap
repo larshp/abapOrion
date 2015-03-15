@@ -19,6 +19,9 @@ PARAMETERS: p_url   TYPE text100 OBLIGATORY,
             p_user  TYPE text20 OBLIGATORY,
             p_passw TYPE text20 OBLIGATORY.
 
+AT SELECTION-SCREEN OUTPUT.
+  PERFORM selection_output.
+
 INITIALIZATION.
   PERFORM initialization.
 
@@ -94,14 +97,19 @@ CLASS lcl_util DEFINITION FINAL.
       IMPORTING value(iv_data) TYPE string.
     CLASS-METHODS parse
       IMPORTING value(iv_html) TYPE string
-                ii_client TYPE REF TO if_http_client.
+                ii_client TYPE REF TO if_http_client
+      RETURNING value(rv_data) TYPE string.
     CLASS-METHODS output_string
       IMPORTING value(iv_str) TYPE string.
     CLASS-METHODS output_response_headers
       IMPORTING ii_client TYPE REF TO if_http_client.
     CLASS-METHODS output_request_headers
       IMPORTING ii_client TYPE REF TO if_http_client.
+    CLASS-METHODS output_request_cookies
+      IMPORTING ii_client TYPE REF TO if_http_client.
     CLASS-METHODS send_and_receive
+      IMPORTING ii_client TYPE REF TO if_http_client.
+    CLASS-METHODS transfer_cookies
       IMPORTING ii_client TYPE REF TO if_http_client.
 
 ENDCLASS.                    "lcl_util DEFINITION
@@ -112,6 +120,43 @@ ENDCLASS.                    "lcl_util DEFINITION
 *
 *----------------------------------------------------------------------*
 CLASS lcl_util IMPLEMENTATION.
+
+  METHOD transfer_cookies.
+
+    DATA: lt_cookies TYPE tihttpcki.
+
+    FIELD-SYMBOLS: <ls_cookie> LIKE LINE OF lt_cookies.
+
+
+    ii_client->response->get_cookies( CHANGING cookies = lt_cookies ).
+
+    LOOP AT lt_cookies ASSIGNING <ls_cookie>.
+      ii_client->request->set_cookie(
+        name    = <ls_cookie>-name
+        path    = <ls_cookie>-path
+        value   = <ls_cookie>-value
+        domain  = <ls_cookie>-xdomain
+        expires = <ls_cookie>-expires
+        secure  = <ls_cookie>-secure ).
+    ENDLOOP.
+
+  ENDMETHOD.                    "transfer_cookies
+
+  METHOD output_request_cookies.
+
+    DATA: lt_cookies TYPE tihttpcki.
+
+    FIELD-SYMBOLS: <ls_cookie> LIKE LINE OF lt_cookies.
+
+
+    WRITE: / 'REQUEST COOKIES'.
+    ii_client->request->get_cookies( CHANGING cookies = lt_cookies ).
+    LOOP AT lt_cookies ASSIGNING <ls_cookie>.
+      WRITE: / <ls_cookie>-name, <ls_cookie>-value.
+    ENDLOOP.
+    WRITE: /.
+
+  ENDMETHOD.                    "output_request_cookies
 
   METHOD send_and_receive.
 
@@ -173,9 +218,9 @@ CLASS lcl_util IMPLEMENTATION.
 
   METHOD output_string.
 
-    WHILE strlen( iv_str ) > 100.
-      WRITE: / iv_str(100).
-      iv_str = iv_str+100.
+    WHILE strlen( iv_str ) > 150.
+      WRITE: / iv_str(150).
+      iv_str = iv_str+150.
     ENDWHILE.
     WRITE: / iv_str.
 
@@ -188,7 +233,9 @@ CLASS lcl_util IMPLEMENTATION.
           lv_name   TYPE string,
           lv_value  TYPE string,
           lv_regex  TYPE string,
-          lt_fields TYPE tihttpnvp.
+          lt_fields TYPE tihttpnvp,
+          lv_string TYPE string,
+          lt_strings TYPE TABLE OF string.
 
     FIELD-SYMBOLS: <ls_field> LIKE LINE OF lt_fields.
 
@@ -236,7 +283,15 @@ CLASS lcl_util IMPLEMENTATION.
     ENDWHILE.
     WRITE: /.
 
-    ii_client->request->set_form_fields( lt_fields ).
+* todo, does this work?
+*    ii_client->request->set_form_fields( lt_fields ).
+
+    LOOP AT lt_fields ASSIGNING <ls_field>.
+      <ls_field>-value = cl_http_utility=>if_http_utility~escape_url( <ls_field>-value ).
+      CONCATENATE <ls_field>-name '=' <ls_field>-value INTO lv_string.
+      APPEND lv_string TO lt_strings.
+    ENDLOOP.
+    CONCATENATE LINES OF lt_strings INTO rv_data SEPARATED BY '&'.
 
   ENDMETHOD.                    "parse
 
@@ -693,6 +748,9 @@ FORM run.
 
   DATA: lv_response TYPE string,
         lv_url      TYPE string,
+        lv_len      TYPE i,
+        lv_str      TYPE string,
+        lv_data     TYPE string,
         li_client   TYPE REF TO if_http_client.
 
 
@@ -704,23 +762,36 @@ FORM run.
     IMPORTING
       client = li_client ).
   li_client->propertytype_accept_cookie = li_client->co_enabled.
+*  li_client->propertytype_redirect = li_client->co_disabled.
 
   lcl_util=>send_and_receive( li_client ).
 
   lcl_util=>output_response_headers( li_client ).
 
   lv_response = li_client->response->get_cdata( ).
-  lcl_util=>parse( iv_html = lv_response
-                   ii_client = li_client ).
+  lv_data = lcl_util=>parse( iv_html = lv_response
+                             ii_client = li_client ).
 
   li_client->request->set_header_field(
     name  = '~request_method'
     value = 'POST' ).
+*  li_client->request->set_header_field(
+*      name  = '~request_uri'
+*      value = '/saml2/idp/sso/accounts.sap.com' ).
+
   li_client->request->set_header_field(
-      name  = '~request_uri'
-      value = '/saml2/idp/sso/accounts.sap.com' ).
+      name  = 'content-type'
+      value = 'application/x-www-form-urlencoded' ).
+  lv_str = strlen( lv_data ).
+  li_client->request->set_header_field(
+      name  = 'content-length'
+      value = lv_str ).
+  li_client->request->set_cdata( lv_data ).
+
+*  lcl_util=>transfer_cookies( li_client ).
 
   lcl_util=>output_request_headers( li_client ).
+  lcl_util=>output_request_cookies( li_client ).
   lcl_util=>send_and_receive( li_client ).
 
   lcl_util=>output_response_headers( li_client ).
@@ -728,9 +799,21 @@ FORM run.
 
   IF lv_response CP '*Sorry*'.
     WRITE: / 'Sorry, we could not authenticate you. Try again.'.
+    RETURN.
   ELSE.
     WRITE: / 'SOMETHING WORKED?!'.
+    lcl_util=>output_string( lv_response ).
   ENDIF.
+
+*  li_client->request->set_header_field(
+*    name  = '~request_method'
+*    value = 'POST' ).
+*  li_client->request->set_header_field(
+*      name  = '~request_uri'
+*      value = lv_url ).
+*
+*  lcl_util=>send_and_receive( li_client ).
+*  lcl_util=>output_string( lv_response ).
 
   li_client->close( ).
 
@@ -757,3 +840,19 @@ FORM initialization.
       ##fm_subrc_ok.
 
 ENDFORM.                    "initialization
+
+*&---------------------------------------------------------------------*
+*&      Form  selection_output
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+FORM selection_output.
+
+  LOOP AT SCREEN.
+    IF screen-name = 'P_PASSW'.
+      screen-invisible = '1'.
+      MODIFY SCREEN.
+    ENDIF.
+  ENDLOOP.
+
+ENDFORM.                    "selection_output
