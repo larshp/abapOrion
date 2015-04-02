@@ -20,6 +20,13 @@ public section.
       !IV_PATH type STRING default ''
     returning
       value(RT_LIST) type TY_DIR_LIST_TT .
+  methods DIR_METADATA .
+  methods FILE_CONTENTS
+    importing
+      !IV_PATH type STRING
+    returning
+      value(RV_DATA) type STRING .
+  methods FILE_METADATA .
 protected section.
 private section.
 ENDCLASS.
@@ -66,6 +73,29 @@ METHOD dir_list.
   ENDWHILE.
 
   SORT rt_list BY name ASCENDING AS TEXT.
+
+ENDMETHOD.
+
+
+METHOD dir_metadata.
+
+
+ENDMETHOD.
+
+
+METHOD file_contents.
+
+  set_uri( 'file/' && iv_path ).
+
+  DATA(lv_data) = send_and_receive( ).
+
+* todo, change returning parametr to xstring?
+
+ENDMETHOD.
+
+
+METHOD file_metadata.
+
 
 ENDMETHOD.
 ENDCLASS.
