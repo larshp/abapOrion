@@ -20,7 +20,19 @@ START-OF-SELECTION.
 *----------------------------------------------------------------------*
 FORM run.
 
-* todo
+  DATA: lo_factory TYPE REF TO zcl_orion_factory.
+
+
+  CREATE OBJECT lo_factory
+    EXPORTING
+      iv_url      = CONV #( p_url )
+      iv_user     = CONV #( p_user )
+      iv_password = CONV #( p_passw ).
+
+  DATA(lo_file) = lo_factory->file( ).
+
+  DATA(lt_list) = lo_file->dir_list( ).
+  BREAK-POINT.
 
 ENDFORM.                    "run
 
@@ -33,6 +45,9 @@ FORM initialization.
 
   IF p_url IS INITIAL.
     p_url = 'http://hanadb:8002'.
+  ENDIF.
+  IF p_user IS INITIAL.
+    p_user = 'SYSTEM'.
   ENDIF.
 
   CALL FUNCTION 'RS_SUPPORT_SELECTIONS'
