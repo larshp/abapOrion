@@ -6,5 +6,7 @@ Client implementation of
 http://help.sap.com/hana/SAP_HANA_XS_REST_API_Reference_en/index.html
 
 Requirements:
-* ABAP 740
+* ABAP 740 SP8
 * HANA SP8
+
+Install with [abapGit](https://github.com/larshp/abapGit)
