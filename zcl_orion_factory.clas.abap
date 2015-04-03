@@ -77,7 +77,7 @@ METHOD constructor.
 
   IF iv_test = abap_true.
     DATA(lo_file) = file( ).
-    lo_file->dir_list( ).
+    lo_file->dir_get( ).
   ENDIF.
 
 ENDMETHOD.

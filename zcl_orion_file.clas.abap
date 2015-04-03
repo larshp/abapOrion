@@ -15,17 +15,31 @@ public section.
   types:
     ty_dir_list_tt TYPE STANDARD TABLE OF ty_dir_list WITH DEFAULT KEY .
 
-  methods DIR_LIST
+  methods FILE_CREATE
+    importing
+      !IV_PATH type STRING
+      !IV_NAME type STRING .
+  methods DIR_CREATE
+    importing
+      !IV_PATH type STRING
+      !IV_NAME type STRING .
+  methods DIR_DELETE
+    importing
+      !IV_PATH type STRING .
+  methods DIR_GET
     importing
       !IV_PATH type STRING default ''
     returning
       value(RT_LIST) type TY_DIR_LIST_TT .
-  methods FILE_CONTENTS
+  methods FILE_DELETE
+    importing
+      !IV_PATH type STRING .
+  methods FILE_GET
     importing
       !IV_PATH type STRING
     returning
       value(RV_DATA) type STRING .
-  methods FILE_SET_CONTENTS
+  methods FILE_UPDATE
     importing
       !IV_PATH type STRING
       !IV_DATA type STRING .
@@ -43,7 +57,51 @@ ENDCLASS.
 CLASS ZCL_ORION_FILE IMPLEMENTATION.
 
 
-METHOD dir_list.
+METHOD dir_create.
+
+  DATA(lv_token) = token( ).
+
+  set_uri( 'file/' && iv_path ) ##NO_TEXT.
+
+  mi_client->request->set_header_field(
+      name  = '~request_method'
+      value = 'POST' ).
+
+  mi_client->request->set_header_field(
+      name  = 'X-CSRF-Token'
+      value = lv_token ) ##NO_TEXT.
+
+  mi_client->request->set_header_field(
+      name  = 'Slug'
+      value = iv_name ) ##NO_TEXT.
+
+  send_and_receive( ).
+
+ENDMETHOD.
+
+
+METHOD dir_delete.
+
+* no '/' at end of iv_path when deleting directories
+
+  DATA(lv_token) = token( ).
+
+  set_uri( 'file/' && iv_path ) ##NO_TEXT.
+
+  mi_client->request->set_header_field(
+      name  = '~request_method'
+      value = 'DELETE' ).
+
+  mi_client->request->set_header_field(
+      name  = 'X-CSRF-Token'
+      value = lv_token ) ##NO_TEXT.
+
+  send_and_receive( ).
+
+ENDMETHOD.
+
+
+METHOD dir_get.
 
   DATA: lv_xpath TYPE string,
         ls_list  LIKE LINE OF rt_list.
@@ -84,7 +142,22 @@ METHOD dir_list.
 ENDMETHOD.
 
 
-METHOD file_contents.
+METHOD file_create.
+
+  dir_create( iv_path = iv_path
+              iv_name = iv_name ).
+
+ENDMETHOD.
+
+
+METHOD file_delete.
+
+  dir_delete( iv_path ).
+
+ENDMETHOD.
+
+
+METHOD file_get.
 
   set_uri( 'file/' && iv_path ) ##NO_TEXT.
 
@@ -102,7 +175,7 @@ METHOD file_metadata.
 ENDMETHOD.
 
 
-METHOD file_set_contents.
+METHOD file_update.
 
   DATA(lv_token) = token( ).
 

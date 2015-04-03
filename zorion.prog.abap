@@ -89,14 +89,12 @@ CLASS lcl_handler IMPLEMENTATION.
     READ TABLE gt_nodes INTO DATA(ls_node) WITH KEY node_key = node_key.
     ASSERT sy-subrc = 0.
 
-    IF ls_node-isfolder = abap_true.
-      RETURN.
+    IF ls_node-isfolder = abap_false.
+      menu->add_function(
+        EXPORTING
+          fcode = 'META'
+          text  = 'Metadata'(001) ).
     ENDIF.
-
-    menu->add_function(
-      EXPORTING
-        fcode = 'META'
-        text  = 'Metadata'(001) ).
 
   ENDMETHOD.
 
@@ -112,7 +110,7 @@ CLASS lcl_handler IMPLEMENTATION.
     ENDIF.
 
     gv_edit = ls_node-path && ls_node-text.
-    DATA(lv_data) = go_file->file_contents( gv_edit ).
+    DATA(lv_data) = go_file->file_get( gv_edit ).
     go_editor->set_visible( abap_true ).
     go_editor->set_textstream( lv_data ).
 
@@ -126,7 +124,7 @@ CLASS lcl_handler IMPLEMENTATION.
     READ TABLE gt_nodes INTO DATA(ls_node) WITH KEY node_key = node_key.
     ASSERT sy-subrc = 0.
 
-    DATA(lt_list) = go_file->dir_list( ls_node-path && ls_node-text && '/' ).
+    DATA(lt_list) = go_file->dir_get( ls_node-path && ls_node-text && '/' ).
 
     LOOP AT lt_list ASSIGNING FIELD-SYMBOL(<ls_list>).
       APPEND INITIAL LINE TO lt_nodes ASSIGNING FIELD-SYMBOL(<ls_node>).
@@ -184,7 +182,7 @@ CLASS lcl_app IMPLEMENTATION.
     go_editor->get_textstream( IMPORTING text = lv_text ).
     cl_gui_cfw=>flush( ).
 
-    go_file->file_set_contents(
+    go_file->file_update(
         iv_path = gv_edit
         iv_data = lv_text ).
 
@@ -219,7 +217,7 @@ CLASS lcl_app IMPLEMENTATION.
     DATA: lt_nodes TYPE TABLE OF zorion_tree_node.
 
 
-    DATA(lt_list) = go_file->dir_list( ).
+    DATA(lt_list) = go_file->dir_get( ).
     gv_tree_key = 1.
 
     LOOP AT lt_list ASSIGNING FIELD-SYMBOL(<ls_list>).

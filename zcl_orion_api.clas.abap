@@ -107,7 +107,9 @@ METHOD send_and_receive.
   ENDIF.
 
   mi_client->response->get_status( IMPORTING code = DATA(lv_code) ).
-  IF lv_code <> 200.
+  IF lv_code <> 200
+      AND lv_code <> 201
+      AND lv_code <> 204.
     BREAK-POINT.
   ENDIF.
 

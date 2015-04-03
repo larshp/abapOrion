@@ -222,16 +222,13 @@ CLASS lcl_util IMPLEMENTATION.
 
         FIND FIRST OCCURRENCE OF REGEX 'name="([^"]*)"'
           IN lv_sub1 IGNORING CASE
-          SUBMATCHES lv_name.
+          SUBMATCHES lv_name ##NO_TEXT.
         FIND FIRST OCCURRENCE OF REGEX 'value="([^"]*)"'
           IN lv_sub1 IGNORING CASE
-          SUBMATCHES lv_value.
+          SUBMATCHES lv_value ##NO_TEXT.
 *        WRITE: / 'input', lv_name, lv_value.
 
         CASE lv_name.
-*          WHEN 'SAMLRequest'.
-*            lv_xml = lcl_saml=>redirect_decode( iv_encoded = lv_value
-*                                                iv_url = abap_false ).
           WHEN 'j_username'.
             lv_value = p_user.
           WHEN 'j_password'.
@@ -390,11 +387,11 @@ FORM run.
 
   li_client->request->set_header_field(
       name  = 'content-type'
-      value = 'application/x-www-form-urlencoded' ).
+      value = 'application/x-www-form-urlencoded' ) ##NO_TEXT.
   lv_str = strlen( lv_data ).
   li_client->request->set_header_field(
       name  = 'content-length'
-      value = lv_str ).
+      value = lv_str ) ##NO_TEXT.
   li_client->request->set_cdata( lv_data ).
 
   lcl_util=>output_string( lv_data ).
@@ -404,8 +401,6 @@ FORM run.
   lcl_util=>output_request_headers( li_client ).
   lcl_util=>output_request_cookies( li_client ).
   lcl_util=>send_and_receive( li_client ).
-
-
 
   lcl_util=>output_response_headers( li_client ).
   lcl_util=>output_response_cookies( li_client ).
@@ -444,7 +439,7 @@ FORM initialization.
 
   IF p_url IS INITIAL.
     p_url = 'https://s7hanaxs.hanatrial.ondemand.com/' &&
-              'p13939179trial/foobar/0_NewPackage/index.html'.
+              'p13939179trial/foobar/0_NewPackage/index.html' ##NO_TEXT.
   ENDIF.
 
   CALL FUNCTION 'RS_SUPPORT_SELECTIONS'
