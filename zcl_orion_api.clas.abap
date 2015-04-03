@@ -30,6 +30,14 @@ protected section.
       !IV_DISPLAY type ABAP_BOOL default ABAP_FALSE
     returning
       value(RV_XML) type STRING .
+  methods TOKEN
+    returning
+      value(RV_TOKEN) type STRING .
+  methods JSON_PRETTY
+    importing
+      !IV_JSON type STRING
+    returning
+      value(RV_PRETTY) type STRING .
 private section.
 ENDCLASS.
 
@@ -41,6 +49,22 @@ CLASS ZCL_ORION_API IMPLEMENTATION.
 METHOD constructor.
 
   mi_client = ii_client.
+
+ENDMETHOD.
+
+
+METHOD json_pretty.
+
+  DATA(lv_xjson) = cl_abap_codepage=>convert_to( iv_json ).
+  DATA(li_reader) = cl_sxml_string_reader=>create( lv_xjson ).
+  DATA(li_writer) = CAST if_sxml_writer(
+                      cl_sxml_string_writer=>create( if_sxml=>co_xt_json ) ).
+  li_writer->set_option( if_sxml_writer=>co_opt_linebreaks ).
+  li_writer->set_option( if_sxml_writer=>co_opt_indent ).
+  li_reader->next_node( ).
+  li_reader->skip_node( li_writer ).
+  rv_pretty = cl_abap_codepage=>convert_from(
+                CAST cl_sxml_string_writer( li_writer )->get_output( ) ).
 
 ENDMETHOD.
 
@@ -106,6 +130,32 @@ METHOD set_uri.
   mi_client->request->set_header_field(
       name  = '~request_uri'
       value = lv_uri ).
+
+ENDMETHOD.
+
+
+METHOD token.
+
+  mi_client->request->set_header_field(
+      name  = '~request_uri'
+      value = '/sap/hana/xs/dt/base/server/csrf.xsjs' ).
+
+  mi_client->request->set_header_field(
+      name  = '~request_method'
+      value = 'HEAD' ).
+
+  mi_client->request->set_header_field(
+      name  = 'X-CSRF-Token'
+      value = 'Fetch' ) ##NO_TEXT.
+
+  send_and_receive( ).
+
+  rv_token = mi_client->response->get_header_field( 'x-csrf-token' ) ##NO_TEXT.
+
+* reset to default request method
+  mi_client->request->set_header_field(
+      name  = '~request_method'
+      value = 'GET' ).
 
 ENDMETHOD.
 

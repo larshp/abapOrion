@@ -20,13 +20,20 @@ public section.
       !IV_PATH type STRING default ''
     returning
       value(RT_LIST) type TY_DIR_LIST_TT .
-  methods DIR_METADATA .
   methods FILE_CONTENTS
     importing
       !IV_PATH type STRING
     returning
       value(RV_DATA) type STRING .
-  methods FILE_METADATA .
+  methods FILE_SET_CONTENTS
+    importing
+      !IV_PATH type STRING
+      !IV_DATA type STRING .
+  methods FILE_METADATA
+    importing
+      !IV_PATH type STRING
+    returning
+      value(RV_DATA) type STRING .
 protected section.
 private section.
 ENDCLASS.
@@ -42,7 +49,7 @@ METHOD dir_list.
         ls_list  LIKE LINE OF rt_list.
 
 
-  set_uri( 'file/' && iv_path && '?depth=1' ).
+  set_uri( 'file/' && iv_path && '?depth=1' ) ##NO_TEXT.
 
   DATA(lv_json) = send_and_receive( ).
   DATA(lv_xml) = json_to_xml( lv_json ).
@@ -77,25 +84,45 @@ METHOD dir_list.
 ENDMETHOD.
 
 
-METHOD dir_metadata.
-
-
-ENDMETHOD.
-
-
 METHOD file_contents.
 
-  set_uri( 'file/' && iv_path ).
+  set_uri( 'file/' && iv_path ) ##NO_TEXT.
 
-  DATA(lv_data) = send_and_receive( ).
-
-* todo, change returning parametr to xstring?
+  rv_data = send_and_receive( ).
 
 ENDMETHOD.
 
 
 METHOD file_metadata.
 
+  set_uri( 'file/' && iv_path && '?parts=meta' ) ##NO_TEXT.
+
+  rv_data = json_pretty( send_and_receive( ) ).
+
+ENDMETHOD.
+
+
+METHOD file_set_contents.
+
+  DATA(lv_token) = token( ).
+
+  set_uri( 'file/' && iv_path ) ##NO_TEXT.
+
+  mi_client->request->set_header_field(
+      name  = '~request_method'
+      value = 'PUT' ).
+
+  mi_client->request->set_header_field(
+      name  = 'X-CSRF-Token'
+      value = lv_token ) ##NO_TEXT.
+
+  mi_client->request->set_header_field(
+      name  = 'Content-Type'
+      value = 'text/plain' ) ##NO_TEXT.
+
+  mi_client->request->set_cdata( iv_data ).
+
+  send_and_receive( ).
 
 ENDMETHOD.
 ENDCLASS.

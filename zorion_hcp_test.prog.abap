@@ -1,8 +1,7 @@
 REPORT zorion_hcp_test.
 
 * https://s7hanaxs.hanatrial.ondemand.com/sap/hana/xs/dt/base/file/p13939179trial/
-
-*CONSTANTS: c_url TYPE string VALUE 'https://s7hanaxs.hanatrial.ondemand.com/p13939179trial/foobar/0_NewPackage/index.html'.
+* https://s7hanaxs.hanatrial.ondemand.com/p13939179trial/foobar/0_NewPackage/index.html
 
 PARAMETERS: p_url   TYPE text200 OBLIGATORY,
             p_user  TYPE text20 OBLIGATORY,
@@ -26,19 +25,18 @@ CLASS lcl_util DEFINITION FINAL.
 
   PUBLIC SECTION.
     CLASS-METHODS download
-      IMPORTING value(iv_data) TYPE string.
+      IMPORTING VALUE(iv_data) TYPE string.
 
-    CLASS-METHODS escape
-      IMPORTING iv_data TYPE string
-      RETURNING value(rv_data) TYPE string.
+    CLASS-METHODS escape_data
+      IMPORTING iv_data        TYPE string
+      RETURNING VALUE(rv_data) TYPE string.
 
     CLASS-METHODS parse
-      IMPORTING value(iv_html) TYPE string
-                ii_client TYPE REF TO if_http_client
-      RETURNING value(rv_data) TYPE string.
+      IMPORTING VALUE(iv_html) TYPE string
+      RETURNING VALUE(rv_data) TYPE string.
 
     CLASS-METHODS output_string
-      IMPORTING value(iv_str) TYPE string.
+      IMPORTING iv_str TYPE string.
 
     CLASS-METHODS output_response_headers
       IMPORTING ii_client TYPE REF TO if_http_client.
@@ -180,23 +178,25 @@ CLASS lcl_util IMPLEMENTATION.
 
   METHOD output_string.
 
-    WHILE strlen( iv_str ) > 150.
-      WRITE: / iv_str(150).
-      iv_str = iv_str+150.
+    DATA(lv_str) = iv_str.
+
+    WHILE strlen( lv_str ) > 150.
+      WRITE: / lv_str(150).
+      lv_str = lv_str+150.
     ENDWHILE.
-    WRITE: / iv_str.
+    WRITE: / lv_str.
 
   ENDMETHOD.                    "output_string
 
   METHOD parse.
 
-    DATA: lv_sub1   TYPE string,
-          lv_run    TYPE abap_bool,
-          lv_name   TYPE string,
-          lv_value  TYPE string,
-          lv_regex  TYPE string,
-          lt_fields TYPE tihttpnvp,
-          lv_string TYPE string,
+    DATA: lv_sub1    TYPE string,
+          lv_run     TYPE abap_bool,
+          lv_name    TYPE string,
+          lv_value   TYPE string,
+          lv_regex   TYPE string,
+          lt_fields  TYPE tihttpnvp,
+          lv_string  TYPE string,
           lt_strings TYPE TABLE OF string.
 
     FIELD-SYMBOLS: <ls_field> LIKE LINE OF lt_fields.
@@ -264,7 +264,7 @@ CLASS lcl_util IMPLEMENTATION.
 
   ENDMETHOD.                    "parse
 
-  METHOD escape.
+  METHOD escape_data.
 
     rv_data = iv_data.
 
@@ -356,7 +356,6 @@ FORM run.
 
   DATA: lv_response TYPE string,
         lv_url      TYPE string,
-        lv_len      TYPE i,
         lv_str      TYPE string,
         lv_data     TYPE string,
         li_client   TYPE REF TO if_http_client.
@@ -379,8 +378,7 @@ FORM run.
   lcl_util=>output_response_headers( li_client ).
 
   lv_response = li_client->response->get_cdata( ).
-  lv_data = lcl_util=>parse( iv_html = lv_response
-                             ii_client = li_client ).
+  lv_data = lcl_util=>parse( lv_response ).
 
   li_client->request->set_method( if_http_request=>co_request_method_post ).
 *  li_client->request->set_header_field(
@@ -445,7 +443,8 @@ ENDFORM.                    "run
 FORM initialization.
 
   IF p_url IS INITIAL.
-    p_url = 'https://s7hanaxs.hanatrial.ondemand.com/p13939179trial/foobar/0_NewPackage/index.html'.
+    p_url = 'https://s7hanaxs.hanatrial.ondemand.com/' &&
+              'p13939179trial/foobar/0_NewPackage/index.html'.
   ENDIF.
 
   CALL FUNCTION 'RS_SUPPORT_SELECTIONS'
