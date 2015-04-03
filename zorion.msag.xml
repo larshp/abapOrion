@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v0.2-alpha">
+ <T100A>
+  <ARBGB>ZORION</ARBGB>
+  <MASTERLANG></MASTERLANG>
+  <APPLCLASS></APPLCLASS>
+  <RESPUSER></RESPUSER>
+  <LASTUSER></LASTUSER>
+  <LDATE>00000000</LDATE>
+  <LTIME>000000</LTIME>
+  <STEXT>Orion</STEXT>
+ </T100A>
+ <T100>
+  <T100>
+   <SPRSL>E</SPRSL>
+   <ARBGB>ZORION</ARBGB>
+   <MSGNR>001</MSGNR>
+   <TEXT>Nothing changed</TEXT>
+  </T100>
+  <T100>
+   <SPRSL>E</SPRSL>
+   <ARBGB>ZORION</ARBGB>
+   <MSGNR>002</MSGNR>
+   <TEXT>Saved</TEXT>
+  </T100>
+ </T100>
+</abapGit>
