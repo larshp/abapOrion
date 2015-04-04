@@ -17,9 +17,9 @@ AT SELECTION-SCREEN OUTPUT.
 
 FORM run.
 
-  DATA(lo_factory) = NEW zcl_orion_factory( iv_url      = CONV #( p_url )
-                                            iv_user     = CONV #( p_user )
-                                            iv_password = CONV #( p_passw ) ).
+  DATA(lo_factory) = NEW zcl_orion_factory( iv_url      = p_url
+                                            iv_user     = p_user
+                                            iv_password = p_passw ).
 
   DATA(lo_file) = lo_factory->file( ).
 

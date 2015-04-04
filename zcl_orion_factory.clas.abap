@@ -6,9 +6,9 @@ public section.
 
   methods CONSTRUCTOR
     importing
-      !IV_URL type STRING
-      !IV_USER type STRING
-      !IV_PASSWORD type STRING
+      !IV_URL type CLIKE
+      !IV_USER type CLIKE
+      !IV_PASSWORD type CLIKE
       !IV_TEST type ABAP_BOOL default ABAP_FALSE .
   methods FILE
     returning

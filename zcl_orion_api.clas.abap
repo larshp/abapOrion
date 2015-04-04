@@ -39,6 +39,8 @@ protected section.
     returning
       value(RV_PRETTY) type STRING .
 private section.
+
+  data MV_TOKEN type STRING .
 ENDCLASS.
 
 
@@ -138,6 +140,11 @@ ENDMETHOD.
 
 METHOD token.
 
+  IF NOT mv_token IS INITIAL.
+    rv_token = mv_token.
+    RETURN.
+  ENDIF.
+
   mi_client->request->set_header_field(
       name  = '~request_uri'
       value = '/sap/hana/xs/dt/base/server/csrf.xsjs' ).
@@ -153,6 +160,7 @@ METHOD token.
   send_and_receive( ).
 
   rv_token = mi_client->response->get_header_field( 'x-csrf-token' ) ##NO_TEXT.
+  mv_token = rv_token.
 
 * reset to default request method
   mi_client->request->set_header_field(

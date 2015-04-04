@@ -271,9 +271,9 @@ CLASS lcl_app IMPLEMENTATION.
 
     CREATE OBJECT go_factory
       EXPORTING
-        iv_url      = CONV #( p_url )
-        iv_user     = CONV #( p_user )
-        iv_password = CONV #( p_passw ).
+        iv_url      = p_url
+        iv_user     = p_user
+        iv_password = p_passw.
 
     go_file = go_factory->file( ).
 
