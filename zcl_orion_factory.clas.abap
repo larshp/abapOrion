@@ -13,7 +13,9 @@ public section.
   methods FILE
     returning
       value(RO_API) type ref to ZCL_ORION_FILE .
-  methods WORKSPACE .
+  methods WORKSPACE
+    returning
+      value(RO_API) type ref to ZCL_ORION_WORKSPACE .
   methods TRANSFER .
   methods METADATA .
   methods INFO .
@@ -133,7 +135,9 @@ ENDMETHOD.
 
 METHOD workspace.
 
-* todo
+  CREATE OBJECT ro_api
+    EXPORTING
+      ii_client = mi_client.
 
 ENDMETHOD.
 ENDCLASS.
