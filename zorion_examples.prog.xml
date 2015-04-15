@@ -78,6 +78,12 @@
   </TEXTPOOL>
   <TEXTPOOL>
    <ID>S</ID>
+   <KEY>P_INFO</KEY>
+   <ENTRY>        Info</ENTRY>
+   <LENGTH>12 </LENGTH>
+  </TEXTPOOL>
+  <TEXTPOOL>
+   <ID>S</ID>
    <KEY>P_LISTW</KEY>
    <ENTRY>        List workspaces</ENTRY>
    <LENGTH>23 </LENGTH>

@@ -6,10 +6,12 @@ PARAMETERS: p_url   TYPE text200 OBLIGATORY,
 
 PARAMETERS: p_create TYPE c RADIOBUTTON GROUP g1 DEFAULT 'X',
             p_listw  TYPE c RADIOBUTTON GROUP g1,
-            p_cwork  TYPE c RADIOBUTTON GROUP g1.
+            p_cwork  TYPE c RADIOBUTTON GROUP g1,
+            p_info   TYPE c RADIOBUTTON GROUP g1.
 
 DATA: go_file      TYPE REF TO zcl_orion_file,
-      go_workspace TYPE REF TO zcl_orion_workspace.
+      go_workspace TYPE REF TO zcl_orion_workspace,
+      go_info      TYPE REF TO zcl_orion_info.
 
 START-OF-SELECTION.
   PERFORM run.
@@ -32,6 +34,8 @@ FORM run.
     PERFORM list_workspaces.
   ELSEIF p_cwork = abap_true.
     PERFORM create_workspace.
+  ELSEIF p_info = abap_true.
+    PERFORM info.
   ELSE.
     ASSERT 1 = 1 + 1.
   ENDIF.
@@ -47,6 +51,7 @@ FORM setup.
                                             iv_password = p_passw ).
   go_file = lo_factory->file( ).
   go_workspace = lo_factory->workspace( ).
+  go_info = lo_factory->info( ).
 
 ENDFORM.
 
@@ -75,5 +80,15 @@ ENDFORM.
 FORM create_workspace.
 
   go_workspace->create( 'foobar' ).
+
+ENDFORM.
+
+FORM info.
+
+  DATA(ls_info) = go_info->get( ).
+
+  LOOP AT ls_info-commands ASSIGNING FIELD-SYMBOL(<ls_command>).
+    WRITE: / <ls_command>-name.
+  ENDLOOP.
 
 ENDFORM.

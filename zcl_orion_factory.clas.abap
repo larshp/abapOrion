@@ -16,10 +16,18 @@ public section.
   methods WORKSPACE
     returning
       value(RO_API) type ref to ZCL_ORION_WORKSPACE .
-  methods TRANSFER .
-  methods METADATA .
-  methods INFO .
-  methods CHANGE_TRACKING .
+  methods TRANSFER
+    returning
+      value(RO_API) type ref to ZCL_ORION_WORKSPACE .
+  methods METADATA
+    returning
+      value(RO_API) type ref to ZCL_ORION_WORKSPACE .
+  methods INFO
+    returning
+      value(RO_API) type ref to ZCL_ORION_INFO .
+  methods CHANGE_TRACKING
+    returning
+      value(RO_API) type ref to ZCL_ORION_WORKSPACE .
 protected section.
 private section.
 
@@ -96,7 +104,9 @@ ENDMETHOD.
 
 METHOD info.
 
-* todo
+  CREATE OBJECT ro_api
+    EXPORTING
+      ii_client = mi_client.
 
 ENDMETHOD.
 
