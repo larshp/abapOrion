@@ -1,6 +1,6 @@
 REPORT zorion_examples.
 
-PARAMETERS: p_url   TYPE text200 OBLIGATORY,
+PARAMETERS: p_url   TYPE text200 OBLIGATORY DEFAULT 'http://hanadb:8002',
             p_user  TYPE text20 OBLIGATORY,
             p_passw TYPE text20 OBLIGATORY.
 
