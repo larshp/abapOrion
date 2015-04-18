@@ -10,3 +10,5 @@ Requirements:
 * HANA SP8
 
 Install with [abapGit](https://github.com/larshp/abapGit)
+
+Does not work with HCP
