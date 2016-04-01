@@ -34,6 +34,19 @@
     <PROXYTYPE/>
     <EXCLASS>1</EXCLASS>
     <WRONGCL/>
+    <ALWAYSTRP/>
+    <ALLDATAINCL/>
+    <WITH_PARAMETERS/>
+    <EXVIEW_INCLUDED/>
+    <KEYMAX_FEATURE/>
+    <KEYLEN_FEATURE/>
+    <TABLEN_FEATURE/>
+    <NONTRP_INCLUDED/>
+    <VIEWREF/>
+    <VIEWREF_ERR/>
+    <TBFUNC_INCLUDED/>
+    <IS_GTT/>
+    <SESSION_VAR_EX/>
    </DD02V>
    <DD09L>
     <TABNAME/>
@@ -54,6 +67,7 @@
     <ACTFLAG/>
     <BUFALLOW/>
     <JAVAONLY/>
+    <ROWORCOLST/>
    </DD09L>
    <DD03P_TABLE>
     <DD03P>
