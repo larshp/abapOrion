@@ -1,42 +1,42 @@
-class ZCL_ORION_FACTORY definition
-  public
-  create public .
+CLASS zcl_orion_factory DEFINITION
+  PUBLIC
+  CREATE PUBLIC .
 
-public section.
+  PUBLIC SECTION.
 
-  methods CONSTRUCTOR
-    importing
-      !IV_URL type CLIKE
-      !IV_USER type CLIKE
-      !IV_PASSWORD type CLIKE
-      !IV_TEST type ABAP_BOOL default ABAP_FALSE .
-  methods FILE
-    returning
-      value(RO_API) type ref to ZCL_ORION_FILE .
-  methods WORKSPACE
-    returning
-      value(RO_API) type ref to ZCL_ORION_WORKSPACE .
-  methods TRANSFER
-    returning
-      value(RO_API) type ref to ZCL_ORION_WORKSPACE .
-  methods METADATA
-    returning
-      value(RO_API) type ref to ZCL_ORION_WORKSPACE .
-  methods INFO
-    returning
-      value(RO_API) type ref to ZCL_ORION_INFO .
-  methods CHANGE_TRACKING
-    returning
-      value(RO_API) type ref to ZCL_ORION_WORKSPACE .
-protected section.
-private section.
+    METHODS constructor
+      IMPORTING
+        !iv_url      TYPE clike
+        !iv_user     TYPE clike
+        !iv_password TYPE clike
+        !iv_test     TYPE abap_bool DEFAULT abap_false .
+    METHODS file
+      RETURNING
+        VALUE(ro_api) TYPE REF TO zcl_orion_file .
+    METHODS workspace
+      RETURNING
+        VALUE(ro_api) TYPE REF TO zcl_orion_workspace .
+    METHODS transfer
+      RETURNING
+        VALUE(ro_api) TYPE REF TO zcl_orion_workspace .
+    METHODS metadata
+      RETURNING
+        VALUE(ro_api) TYPE REF TO zcl_orion_workspace .
+    METHODS info
+      RETURNING
+        VALUE(ro_api) TYPE REF TO zcl_orion_info .
+    METHODS change_tracking
+      RETURNING
+        VALUE(ro_api) TYPE REF TO zcl_orion_workspace .
+  PROTECTED SECTION.
+  PRIVATE SECTION.
 
-  data MV_URL type STRING .
-  data MV_USER type STRING .
-  data MV_PASSWORD type STRING .
-  data MI_CLIENT type ref to IF_HTTP_CLIENT .
+    DATA mv_url TYPE string .
+    DATA mv_user TYPE string .
+    DATA mv_password TYPE string .
+    DATA mi_client TYPE REF TO if_http_client .
 
-  methods OPEN_CONNECTION .
+    METHODS open_connection .
 ENDCLASS.
 
 
@@ -44,14 +44,14 @@ ENDCLASS.
 CLASS ZCL_ORION_FACTORY IMPLEMENTATION.
 
 
-METHOD change_tracking.
+  METHOD change_tracking.
 
 * todo
 
-ENDMETHOD.
+  ENDMETHOD.
 
 
-METHOD constructor.
+  METHOD constructor.
 
 * See https://github.com/larshp/abapOrion
 
@@ -79,75 +79,75 @@ METHOD constructor.
 * SOFTWARE.
 ********************************************************************************
 
-  mv_url      = iv_url.
-  mv_user     = iv_user.
-  mv_password = iv_password.
+    mv_url      = iv_url.
+    mv_user     = iv_user.
+    mv_password = iv_password.
 
-  open_connection( ).
+    open_connection( ).
 
-  IF iv_test = abap_true.
-    DATA(lo_file) = file( ).
-    lo_file->dir_get( ).
-  ENDIF.
+    IF iv_test = abap_true.
+      DATA(lo_file) = file( ).
+      lo_file->dir_get( ).
+    ENDIF.
 
-ENDMETHOD.
-
-
-METHOD file.
-
-  CREATE OBJECT ro_api
-    EXPORTING
-      ii_client = mi_client.
-
-ENDMETHOD.
+  ENDMETHOD.
 
 
-METHOD info.
+  METHOD file.
 
-  CREATE OBJECT ro_api
-    EXPORTING
-      ii_client = mi_client.
+    CREATE OBJECT ro_api
+      EXPORTING
+        ii_client = mi_client.
 
-ENDMETHOD.
-
-
-METHOD metadata.
-
-* todo
-
-ENDMETHOD.
+  ENDMETHOD.
 
 
-METHOD open_connection.
+  METHOD info.
 
-  cl_http_client=>create_by_url(
-    EXPORTING
-      url    =  mv_url
-      ssl_id = 'ANONYM'
-    IMPORTING
-      client = mi_client ).
+    CREATE OBJECT ro_api
+      EXPORTING
+        ii_client = mi_client.
 
-  mi_client->request->set_authorization(
-    username = mv_user
-    password = mv_password ).
-
-  mi_client->propertytype_accept_cookie = mi_client->co_enabled.
-
-ENDMETHOD.
+  ENDMETHOD.
 
 
-METHOD transfer.
+  METHOD metadata.
 
 * todo
 
-ENDMETHOD.
+  ENDMETHOD.
 
 
-METHOD workspace.
+  METHOD open_connection.
 
-  CREATE OBJECT ro_api
-    EXPORTING
-      ii_client = mi_client.
+    cl_http_client=>create_by_url(
+      EXPORTING
+        url    =  mv_url
+        ssl_id = 'ANONYM'
+      IMPORTING
+        client = mi_client ).
 
-ENDMETHOD.
+    mi_client->request->set_authorization(
+      username = mv_user
+      password = mv_password ).
+
+    mi_client->propertytype_accept_cookie = mi_client->co_enabled.
+
+  ENDMETHOD.
+
+
+  METHOD transfer.
+
+* todo
+
+  ENDMETHOD.
+
+
+  METHOD workspace.
+
+    CREATE OBJECT ro_api
+      EXPORTING
+        ii_client = mi_client.
+
+  ENDMETHOD.
 ENDCLASS.
