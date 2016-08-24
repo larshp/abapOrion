@@ -91,9 +91,8 @@ CLASS lcl_handler IMPLEMENTATION.
 
     IF ls_node-isfolder = abap_false.
       menu->add_function(
-        EXPORTING
-          fcode = 'META'
-          text  = 'Metadata'(001) ).
+        fcode = 'META'
+        text  = 'Metadata'(001) ).
     ENDIF.
 
   ENDMETHOD.
@@ -298,12 +297,10 @@ CLASS lcl_app IMPLEMENTATION.
         rows    = 1
         columns = 2.
     go_splitter->set_column_mode(
-      EXPORTING
-        mode = go_splitter->mode_absolute ).
+      mode = go_splitter->mode_absolute ).
     go_splitter->set_column_width(
-      EXPORTING
-          id    = 1
-          width = 400 ).
+      id    = 1
+      width = 400 ).
 
     setup_tree( ).
     setup_editor( ).
