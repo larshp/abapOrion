@@ -139,7 +139,7 @@ CLASS lcl_util IMPLEMENTATION.
         code   = lv_code ).
     IF lv_code <> 200.
       WRITE: / lv_code.
-      BREAK-POINT.
+      ASSERT 0 = 1.
     ENDIF.
 
   ENDMETHOD.                    "send_and_receive
@@ -291,7 +291,7 @@ CLASS lcl_util IMPLEMENTATION.
         not_supported_by_gui  = 4
         OTHERS                = 5 ).
     IF sy-subrc <> 0.
-      BREAK-POINT.
+      ASSERT 0 = 1.
       RETURN.
     ENDIF.
     cl_gui_cfw=>flush( ).
@@ -337,7 +337,7 @@ CLASS lcl_util IMPLEMENTATION.
         error_no_gui              = 23
         OTHERS                    = 24 ).
     IF sy-subrc <> 0.
-      BREAK-POINT.
+      ASSERT 0 = 1.
     ENDIF.
 
   ENDMETHOD.                    "download

@@ -105,14 +105,14 @@ CLASS ZCL_ORION_API IMPLEMENTATION.
         http_processing_failed     = 3
         OTHERS = 4 ).
     IF sy-subrc <> 0.
-      BREAK-POINT.
+      ASSERT 0 = 1.
     ENDIF.
 
     mi_client->response->get_status( IMPORTING code = DATA(lv_code) ).
     IF lv_code <> 200
         AND lv_code <> 201
         AND lv_code <> 204.
-      BREAK-POINT.
+      ASSERT 0 = 1.
     ENDIF.
 
     rv_data = mi_client->response->get_cdata( ).
@@ -128,7 +128,7 @@ CLASS ZCL_ORION_API IMPLEMENTATION.
     CONCATENATE '/sap/hana/xs/dt/base/' iv_path INTO lv_uri.
 
     IF lv_uri CP '*//*'.
-      BREAK-POINT.
+      assert 0 = 1.
     ENDIF.
 
     mi_client->request->set_header_field(
