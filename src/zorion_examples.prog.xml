@@ -5,99 +5,65 @@
    <PROGDIR>
     <NAME>ZORION_EXAMPLES</NAME>
     <STATE>A</STATE>
-    <SQLX/>
-    <EDTX/>
     <VARCL>X</VARCL>
-    <DBAPL/>
-    <DBNA/>
-    <CLAS/>
-    <TYPE/>
-    <OCCURS/>
     <SUBC>1</SUBC>
-    <APPL/>
-    <SECU/>
-    <CNAM/>
-    <CDAT>0000-00-00</CDAT>
-    <UNAM/>
-    <UDAT>0000-00-00</UDAT>
-    <VERN/>
-    <LEVL/>
-    <RSTAT/>
-    <RMAND/>
     <RLOAD>E</RLOAD>
     <FIXPT>X</FIXPT>
-    <SSET/>
-    <SDATE>0000-00-00</SDATE>
-    <STIME/>
-    <IDATE>0000-00-00</IDATE>
-    <ITIME/>
-    <LDBNAME/>
     <UCCHECK>X</UCCHECK>
    </PROGDIR>
-   <DYNPROS/>
    <TPOOL>
     <item>
      <ID>I</ID>
      <KEY>001</KEY>
      <ENTRY>Done</ENTRY>
      <LENGTH>14</LENGTH>
-     <SPLIT/>
     </item>
     <item>
      <ID>R</ID>
-     <KEY/>
      <ENTRY>abapOrion - Examples</ENTRY>
      <LENGTH>20</LENGTH>
-     <SPLIT/>
     </item>
     <item>
      <ID>S</ID>
      <KEY>P_CREATE</KEY>
      <ENTRY>Create file</ENTRY>
      <LENGTH>19</LENGTH>
-     <SPLIT/>
     </item>
     <item>
      <ID>S</ID>
      <KEY>P_CWORK</KEY>
      <ENTRY>Create workspace</ENTRY>
      <LENGTH>24</LENGTH>
-     <SPLIT/>
     </item>
     <item>
      <ID>S</ID>
      <KEY>P_INFO</KEY>
      <ENTRY>Info</ENTRY>
      <LENGTH>12</LENGTH>
-     <SPLIT/>
     </item>
     <item>
      <ID>S</ID>
      <KEY>P_LISTW</KEY>
      <ENTRY>List workspaces</ENTRY>
      <LENGTH>23</LENGTH>
-     <SPLIT/>
     </item>
     <item>
      <ID>S</ID>
      <KEY>P_PASSW</KEY>
      <ENTRY>Password</ENTRY>
      <LENGTH>16</LENGTH>
-     <SPLIT/>
     </item>
     <item>
      <ID>S</ID>
      <KEY>P_URL</KEY>
      <ENTRY>URL</ENTRY>
      <LENGTH>11</LENGTH>
-     <SPLIT/>
     </item>
     <item>
      <ID>S</ID>
      <KEY>P_USER</KEY>
      <ENTRY>Username</ENTRY>
      <LENGTH>16</LENGTH>
-     <SPLIT/>
     </item>
    </TPOOL>
   </asx:values>
