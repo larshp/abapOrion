@@ -1,4 +1,4 @@
-[![abaplint](http://abaplint.org/badges/larshp/abapOrion)](http://abaplint.org/project/larshp/abapOrion)
+[![abaplint](https://abaplint.org/badges/larshp/abapOrion)](http://abaplint.org/project/larshp/abapOrion)
 
 # abapOrion
 
