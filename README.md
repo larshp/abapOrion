@@ -1,5 +1,3 @@
-[![abaplint](https://abaplint.org/badges/larshp/abapOrion)](http://abaplint.org/project/larshp/abapOrion)
-
 # abapOrion
 
 Edit HANA objects from ABAP
